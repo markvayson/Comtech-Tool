@@ -20,6 +20,47 @@ if (-not $IsAdmin -or -not $IsSTA) {
     exit
 }
 
+# --- AUTO-UPDATE MODULE ---
+$CurrentVersion = "1.0.0"
+$RepoUser = "markvayson"
+$RepoName = "Comtech-Tool"
+$Branch = "main"
+
+# GitHub Raw URLs
+$VersionUrl = "https://raw.githubusercontent.com/$RepoUser/$RepoName/$Branch/version.txt"
+$ScriptUrl  = "https://raw.githubusercontent.com/$RepoUser/$RepoName/$Branch/adhicsv2.ps1"
+$IconUrl    = "https://raw.githubusercontent.com/$RepoUser/$RepoName/$Branch/app.ico"
+
+try {
+    # Check the cloud version
+    $OnlineVersion = Invoke-RestMethod -Uri $VersionUrl -UseBasicParsing -ErrorAction Stop
+    $OnlineVersion = $OnlineVersion.Trim()
+
+    if ([version]$OnlineVersion -gt [version]$CurrentVersion) {
+        $ScriptPath = $PSCommandPath
+        $IconPath = Join-Path (Split-Path $ScriptPath) "app-icon.ico"
+
+        # 1. Download the new icon (Overwrites the old one)
+        Invoke-WebRequest -Uri $IconUrl -OutFile $IconPath -UseBasicParsing -ErrorAction SilentlyContinue
+        
+        # 2. Download the new script code
+        $NewScriptCode = Invoke-RestMethod -Uri $ScriptUrl -UseBasicParsing
+        
+        # 3. Overwrite the current script with the new code
+        Set-Content -Path $ScriptPath -Value $NewScriptCode -Force
+
+        # 4. Relaunch the freshly updated script and exit the old one
+        Start-Process powershell.exe -ArgumentList "-NoProfile -STA -ExecutionPolicy Bypass -File `"$ScriptPath`""
+        exit
+    }
+} catch {
+    # If there is no internet, or GitHub is blocked, the script skips the update and opens normally.
+}
+# --- END AUTO-UPDATE MODULE ---
+
+
+
+
 # --- 0.5 DETECT SYSTEM THEME (DARK/LIGHT MODE) ---
 $ThemeKey = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
 $script:IsLightMode = $true 
@@ -123,7 +164,7 @@ public class DWM {
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" FontSize="18" FontWeight="SemiBold" Foreground="$TextPrimary" Margin="0,0,0,20">Configuring Host: $env:COMPUTERNAME
+        <TextBlock Grid.Row="0" FontSize="18" FontWeight="SemiBold" Foreground="$TextPrimary" Margin="0,0,0,20">Configuring Host: $env:COMPUTERNAME using version: $CurrentVersion
         </TextBlock>
 
         <Border Grid.Row="1" Background="$PanelBg" CornerRadius="12" BorderBrush="$BorderColor" BorderThickness="1">
