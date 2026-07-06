@@ -697,6 +697,8 @@ $script:BtnBaseline.Add_Click({
     Complete-Task $T_Browser "Browser sign-in and password managers Disabled." "Success"
 
     # ==============================================================================
+$T_Finish = New-TaskRow "Finalizing Compliance Run"
+
 
     Set-TaskRunning $T_Finish
     $ScriptDir = $PSScriptRoot
