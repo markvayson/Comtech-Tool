@@ -22,7 +22,7 @@ if (-not $IsAdmin -or -not $IsSTA) {
 }
 
 # --- 0.25 STANDALONE EXE AUTO-UPDATE MODULE ---
-$CurrentVersion = "2.1.1"
+$CurrentVersion = "2.1.3.0"
 $RepoUser       = "markvayson"   # <--- CHANGE TO YOUR GITHUB USERNAME
 $RepoName       = "Comtech-Tool"         # <--- CHANGE TO YOUR REPOSITORY NAME
 $Branch         = "main"
@@ -804,7 +804,7 @@ $script:BtnInventory.Add_Click({
         if ($buildNumber -ge 22000) { $osCaption = $osCaption -replace "Windows 10", "Windows 11" }
 
         $RAM = if ($systemInfo.TotalPhysicalMemory) { [math]::Round($systemInfo.TotalPhysicalMemory/1GB,2) } else { 0 }
-        
+        <#
         $DomainUsers = @()
         $Profiles = Get-CimInstance Win32_UserProfile -ErrorAction SilentlyContinue | Where-Object { $_.Special -eq $false }
         
@@ -814,8 +814,20 @@ $script:BtnInventory.Add_Click({
                 if ($Account.LocalAccount -eq $false -and $Account.Disabled -eq $false) { $DomainUsers += $Account.Name }
             } catch { continue }
         }
+    #>
         
         $AssetCustodian = if ($DomainUsers.Count -gt 0) { $DomainUsers -join ', ' } else { "None Detected" }
+
+        # --- NEW CODE: Retrieve Network Information ---
+        # Grabs all IP-enabled adapters
+        $ActiveNetworks = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled=$true" -ErrorAction SilentlyContinue
+        
+        # Extracts MAC Addresses and joins them if there are multiple
+        $MacAddresses = ($ActiveNetworks.MACAddress | Where-Object { [string]::IsNullOrWhiteSpace($_) -eq $false }) -join ', '
+        
+        # Extracts IP Addresses, filters for IPv4 only, and joins them if there are multiple
+        $IpAddresses = ($ActiveNetworks.IPAddress | Where-Object { $_ -match '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' }) -join ', '
+        # ----------------------------------------------
 
         $AssetData = [PSCustomObject]@{
             Description   = $Description
@@ -823,7 +835,9 @@ $script:BtnInventory.Add_Click({
             Model         = $systemInfo.Model
             Department    = $Department
             SerialNumber  = $biosInfo.SerialNumber
+            MacAddress    = $MacAddresses
             SystemDetails = "Device: $Hostname | CPU: $($cpu.Name) | RAM: $($RAM)GB | OS: $osCaption $windowsVersion"
+            IpAddress     = $IpAddresses
             HostName      = $Hostname
             AssetClassification = "CONFIDENTIAL"
             C = "4"
@@ -855,7 +869,6 @@ $script:BtnInventory.Add_Click({
     $script:BtnUpdate.IsEnabled = $true
     $script:BtnPass.IsEnabled = $true
 })
-
 # ==============================================================================
 # BUTTON 3: WINDOWS UPDATE
 # ==============================================================================
