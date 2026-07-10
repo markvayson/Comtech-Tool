@@ -1,0 +1,11 @@
+3.0.0 
+- Introduced Settings panel.
+- Introduced Refresh Button to re-check securities.
+- Baseline enforcement targets pending items.
+- Reorganized the files of the project.
+
+2.1.2 - Added button
+• Fixed UI glitch
+
+2.1.1 - Added smb
+• Initial release

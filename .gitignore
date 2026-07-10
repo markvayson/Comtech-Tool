@@ -1,6 +1,8 @@
-*
 
-!app.ico
-!version.txt
-!launcher.ps1
-!.gitignore
+build.ps1
+comtechlauncer.exe
+Execution_Baseline_Summary_COMTECH.csv
+old.ps1
+ps2exe.txt
+security.txt
+.gitignore

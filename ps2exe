@@ -1,0 +1,1 @@
+Invoke-ps2exe -inputFile ".\launcher.ps1" -outputFile ".\comtechlauncher.exe" -iconFile ".\app.ico" -noConsole -RequireAdmin -title "ADHICS Security & Inventory Tool" -description "Security baseline auditing and hardware inventory utility." -version "2.1.1.0" -product "ADHICS" -copyright "Copyright © 2026 Mark Vayson"
